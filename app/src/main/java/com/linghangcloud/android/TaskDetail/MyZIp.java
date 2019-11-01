@@ -1,5 +1,7 @@
 package com.linghangcloud.android.TaskDetail;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,14 +14,16 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class MyZIp {public class ZipFileCreateTest {
-    public void zip(String FileName,File OrderFile)throws Exception{
-        System.out.println("压缩中...");
+public class MyZIp {
+    static class ZipFileCreateTest {
+    public void zip(String FileName,File OrderFile,String Path)throws Exception{
+        Log.e("test:", "zip: \"压缩中...\"" );
         try {
             //此处为名字
-            ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(new File("d://",FileName+".zip")));
+            ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(new File(Path,FileName+".zip")));
             zip(zipOutputStream, OrderFile,FileName);
             zipOutputStream.close();
+            Log.e("test:","文件压缩完成+order:"+OrderFile.getPath());
         } catch (Exception e) {
             // TODO: handle exception
         }
@@ -45,7 +49,7 @@ public class MyZIp {public class ZipFileCreateTest {
         }else {
 
             try {
-                System.out.println("压缩文件"+file.getName()+"...");
+                Log.e("test:", "zip: 压缩文件"+file.getName()+"...\"");
                 out.putNextEntry(new ZipEntry(base));
                 FileInputStream fileInputStream =new FileInputStream(file);
                 int b;
@@ -68,13 +72,13 @@ public class MyZIp {public class ZipFileCreateTest {
             System.out.println("开始解压");
             ZipFile zipFile = new ZipFile(file);
             zin=new ZipInputStream(new FileInputStream(file));
-            ZipEntry entry =zin.getNextEntry();
-//			System.out.println(zin.getNextEntry().toString());
+            ZipEntry entry =null;
+		//	System.out.println(zin.getNextEntry().toString());
 
             while(((entry=zin.getNextEntry())!=null)&&!entry.isDirectory())
             {
-                System.out.println("正在解压"+zipFile.getName()+"...");
-                File tmpFile=new File("d:\\TestOfM\\"+entry.getName());
+                Log.e("test：","正在解压"+zipFile.getName()+"...");
+                File tmpFile=new File(orderpath+"//"+entry.getName());
                 if (!tmpFile.exists()) {
                     tmpFile.getParentFile().mkdirs();
                     tmpFile.createNewFile();

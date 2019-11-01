@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -55,6 +56,8 @@ public class FileFragment extends Fragment {
     private TextView SumNum;
     private CircleImageView submitButton;
     private int submit=5;
+    private File z =null;
+    private File apk=null;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -64,10 +67,14 @@ public class FileFragment extends Fragment {
         SumNum = view.findViewById(R.id.fragment_file_sumnumber);
         editText=view.findViewById(R.id.input);
         submitButton=view.findViewById(R.id.outputfile_button);
+        z =new File(getContext().getExternalCacheDir()+"//zip");
+        apk=new File(getContext().getExternalCacheDir()+"//apk");
        InitList();
        SubmitNum.setText(""+submit);
        SumNum.setText(""+homeWorkList.size());
 
+       z.mkdirs();
+       apk.mkdirs();
 
 //       提交按钮
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -101,6 +108,7 @@ public class FileFragment extends Fragment {
 
     }
 
+    //有待改善 网络连接
     private void InitList() {
         for (int i=0;i<15;i++){
             HomeWork homeWork = new HomeWork();
@@ -120,15 +128,28 @@ public class FileFragment extends Fragment {
         Log.e("test：提取文件", "文件提取工作完成"+uri.toString() );
         String path=getPath(getActivity(),uri);
         File file =new File(path);
-        if (file.exists())
-        Log.e("test：提取文件",file.getName());
+
+        if (file.exists()){
+            Log.e("test：提取文件",file.getPath());
+            MyZIp.ZipFileCreateTest zipFileCreateTest=new MyZIp.ZipFileCreateTest();
+            try {
+                Log.e("test:", "onActivityResult: "+getContext().getExternalCacheDir() );
+                for (String x:file.getName().split(".")){
+                    Log.e("test:", "onActivityResultssss: "+x );
+                }
+                //getContext().getExternalCacheDir().toString()
+                zipFileCreateTest.zip(file.getName(),file,z.getPath());
+                if (new File(getContext().getExternalCacheDir().toString(),file.getName()+".zip").exists()){
+                    Log.e("test:", "onActivityResult: 存在" );
+                }
+                zipFileCreateTest.decompressing(new File(getContext().getExternalCacheDir().toString()+"//zip",file.getName()+".zip"),apk.getPath());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("test:", "onActivityResult: 获取失败" );
+            }
+        }
     }
-
-
-
-
-
-
 
 //  提取文件的的工作
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -226,6 +247,15 @@ public class FileFragment extends Fragment {
     }
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+
+    public static void install(File file,Context context) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file),
+                "application/vnd.android.package-archive");
+        context.startActivity(intent);
     }
 }
 
